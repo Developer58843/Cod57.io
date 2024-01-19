@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    .header {
+      background-color: #5865F2;
+      width: 100%;
+      max-width: 100%;
+      height: 260px;
+      padding: 20px 0;
+      border-bottom: 1px solid #d7d7d7;
+      background-size: cover;
+      text-align: center;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .header img {
+      max-width: 100%;
+      max-height: 140px;
+    }
+
+    .status-box {
+      background-color: #3BA55C;
+      color: #fff;
+      padding: 0.75rem 1.25rem;
+      border-radius: 4px;
+      width: 600px;
+      text-align: center;
+      margin: 20px auto; /* Centering with auto margins */
+      display: flex;
+      align-items: center;
+        }
+
+    .status-text {
+      margin-right: 10px; /* Adjusted margin for space */
+      font-weight: 600;
+
+    }
+
+    .status-box.down {
+      background-color: #FF5252; /* Red color for "Coin Down" */
+    }
+
+    .status-box.operational {
+      background-color: #3BA55C;
+    }
+
+    .past-incidents {
+      text-transform: uppercase;
+      font-size: 15px;
+      color: #060607;
+      margin: 20px auto; /* Centering with auto margins */
+      width: 600px;
+      display: flex;
+      align-items: center;
+      font-weight: 550;
+    }
+
+    .incident-date {
+      border-bottom: 1px solid #060607; /* Bottom line */
+      padding-bottom: 3px;
+      margin: 20px auto; /* Centering with auto margins */
+      width: 600px;
+      display: flex;
+      align-items: center;
+    }
+
+    .resolved,
+    .monitoring {
+      margin: 20px auto;
+      width: 600px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+    }
+
+    .resolved-content,
+    .monitoring-content {
+      font-weight: normal;
+    }
+
+    /* New style for charts */
+    .chart-container {
+      margin: 20px auto;
+      width: 600px;
+    }
+  </style>
+  <!-- Include Chart.js library -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<div class="header">
+<a href="https://discord.com"><img alt="Logo" src="coin.png"/></a>
+</div>
+<!-- Status Box for Coin Operational -->
+<div class="status-box operational" style="display: block;">
+  <span class="status-text">Coin Operational</span>
+</div>
+<!-- Status Box for Coin Down -->
+<div class="status-box down" style="display: none;">
+  <span class="status-text">Coin Down</span>
+</div>
+<!-- Past Incidents -->
+<div class="past-incidents">Past Incidents</div>
+<!-- Incident Date -->
+<div class="incident-date" id="incident-date"></div>
+<!-- Resolved -->
+<div class="resolved" style="display: block;">Resolved<span class="resolved-content"> - This incident has been resolved.</span></div>
+<!-- Monitoring -->
+<div class="monitoring" style="display: none;">Monitoring<span class="resolved-content"> - A fix is slowly being implemented please wait.</span></div>
+<!-- Chart Container -->
+<div class="chart-container">
+  <canvas id="statusChart"></canvas>
+</div>
+
+<script>
+  // Your existing JavaScript code here
+
+  // Load existing status data from local storage
+  const storedStatusData = localStorage.getItem('statusData');
+  const statusData = storedStatusData ? JSON.parse(storedStatusData) : { labels: [], data: [] };
+
+  // New JavaScript code for status chart
+  const statusOptions = {
+    scales: {
+      y: {
+        beginAtZero: true,
+        position: 'right', // Place y-axis ticks on the right side
+        ticks: {
+          stepSize: 1,
+          max: 1,
+          min: 0,
+          callback: function(value) {
+            return value === 1 ? 'Operational' : 'Down';
+          }
+        }
+      },
+      x: {
+        title: {
+          display: true,
+          text: 'Time'
+        }
+      }
+    }
+  };
+
+  const statusChart = new Chart(document.getElementById('statusChart'), {
+    type: 'line',
+    data: statusData,
+    options: statusOptions
+  });
+
+  // Update chart with current time
+  setInterval(() => {
+    const currentTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    statusData.labels.push(currentTime);
+    // Randomly generate status (1 for Operational, 0 for Down)
+    const randomStatus = Math.random() > 0.5 ? 1 : 0;
+    statusData.data.push(randomStatus);
+    statusChart.update();
+
+    // Save updated status data to local storage
+    localStorage.setItem('statusData', JSON.stringify(statusData));
+  }, 10000); // Update every 10 seconds
+
+</script>
+
+<!-- Incident Date -->
+<script>
+  // JavaScript code to update the incident date dynamically
+  const incidentDateElement = document.getElementById('incident-date');
+  const currentDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+  incidentDateElement.textContent = currentDate;
+</script>
+</body></html>
